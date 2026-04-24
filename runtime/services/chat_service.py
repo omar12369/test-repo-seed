@@ -19,6 +19,14 @@ def _choose_variant(text: str, options: list[str]) -> str:
     return options[index]
 
 
+def _choose_sequence_variant(index: int, options: list[str]) -> str:
+    if not options:
+        return ""
+
+    safe_index = max(index, 0)
+    return options[safe_index % len(options)]
+
+
 def _has_word(text: str, word: str) -> bool:
     return re.search(rf"\b{re.escape(word)}\b", text) is not None
 
@@ -28,22 +36,26 @@ def _has_phrase(text: str, phrases: list[str]) -> bool:
 
 
 # ----------------------------
-# Passive Session Context — 7D Phase 1
+# Passive Session Context — 7D Phase 1 / Phase 4
 # ----------------------------
 _CONTEXT_WINDOW = 5
 
 
 class _SessionContext:
     """
-    Step 7D Phase 1: Passive session context tracking.
+    Step 7D Phase 1 / Phase 4: Runtime-session context tracking.
 
-    This stores only the most recent runtime-session exchanges in memory.
-    It does not write files, read files, persist data, alter responses, or
-    affect the voice system.
+    This stores only recent runtime-session exchanges in memory.
+    It does not write files, read files, persist data, or affect the voice system.
+
+    Phase 4 addition:
+    It also keeps a session-only continuation cursor per topic so repeated
+    continuation prompts can advance instead of repeating the same segment.
     """
 
     def __init__(self, max_items: int = _CONTEXT_WINDOW) -> None:
         self.history: deque[dict[str, object]] = deque(maxlen=max_items)
+        self.continuation_cursors: dict[str, int] = {}
 
     def add(self, entry: dict[str, object]) -> None:
         self.history.append(entry)
@@ -59,12 +71,22 @@ class _SessionContext:
     def size(self) -> int:
         return len(self.history)
 
+    def next_continuation_index(self, topic: str) -> int:
+        safe_topic = topic or "general"
+        current = self.continuation_cursors.get(safe_topic, 0)
+        self.continuation_cursors[safe_topic] = current + 1
+        return current
+
+    def reset_continuation(self, topic: str) -> None:
+        safe_topic = topic or "general"
+        self.continuation_cursors[safe_topic] = 0
+
 
 _session_context = _SessionContext()
 
 
 # ----------------------------
-# Context Awareness Helpers — 7D Phase 2 / Phase 3
+# Context Awareness Helpers — 7D Phase 2 / Phase 3 / Phase 4
 # ----------------------------
 def _is_context_continuation_prompt(text: str) -> bool:
     """
@@ -151,14 +173,19 @@ def _build_controlled_continuation_response(
     message: str,
     topic: str,
     previous_response: Optional[str],
+    continuation_index: int,
 ) -> Optional[str]:
     """
-    Step 7D Phase 3: Controlled Continuation Engine.
+    Step 7D Phase 3 / Phase 4: Controlled Continuation Engine.
 
-    This creates a new continuation segment for vague prompts like "continue"
-    while avoiding direct repetition of the previous response.
+    Phase 3:
+    Creates a continuation segment for vague prompts like "continue".
 
-    It is intentionally topic-limited and conservative:
+    Phase 4:
+    Uses a session-only continuation index so repeated continuation prompts
+    advance through a small topic-specific sequence instead of repeating.
+
+    It is intentionally conservative:
     - no persistence
     - no files
     - no database
@@ -172,101 +199,90 @@ def _build_controlled_continuation_response(
         return None
 
     if topic == "system":
-        return _choose_variant(
-            message + previous_response,
-            [
-                (
-                    "The next layer is how the pieces stay separated. The chat route receives the text, "
-                    "the chat service decides meaning and response shape, and the voice route only handles "
-                    "spoken output after the reply is already built."
-                ),
-                (
-                    "Continuing from there, the important design principle is separation of responsibility. "
-                    "Chat intelligence can improve without forcing changes into the stable voice layer, which "
-                    "keeps testing safer."
-                ),
-                (
-                    "The next part is the control flow. A message enters the backend, classification determines "
-                    "intent and topic, response depth decides how much detail to give, and voice output remains "
-                    "optional at the end."
-                ),
-            ],
-        )
+        return _choose_sequence_variant(continuation_index, [
+            (
+                "The next part is the control flow. A message enters the backend, "
+                "classification determines intent and topic, response depth decides "
+                "how much detail to give, and voice output remains optional at the end."
+            ),
+            (
+                "After that, the important design principle is separation of responsibility. "
+                "The chat layer decides meaning and response shape, while the voice layer "
+                "only handles spoken delivery after the reply is already built."
+            ),
+            (
+                "The next layer is stability control. Each capability is added as a small "
+                "extension, tested through text first, then verified through voice so the "
+                "working baseline stays protected."
+            ),
+            (
+                "From there, the system can grow into stronger memory and reasoning layers, "
+                "but only after the current session behavior proves stable and predictable."
+            ),
+        ])
 
     if topic == "phase":
-        return _choose_variant(
-            message + previous_response,
-            [
-                (
-                    "The next step is to keep the phase progression controlled. We confirm the current layer is stable, "
-                    "then add only one new capability before testing again."
-                ),
-                (
-                    "Continuing from there, each phase should protect the previous one. That means no broad refactors, "
-                    "no shortcuts, and no changes outside the exact layer being improved."
-                ),
-                (
-                    "The next layer should be handled the same way: define the capability, add it cleanly, test text first, "
-                    "then confirm voice still behaves correctly."
-                ),
-            ],
-        )
+        return _choose_sequence_variant(continuation_index, [
+            (
+                "The next step is to keep the phase progression controlled. We confirm the "
+                "current layer is stable, then add only one new capability before testing again."
+            ),
+            (
+                "After that, each phase should protect the previous one. That means no broad "
+                "refactors, no shortcuts, and no changes outside the exact layer being improved."
+            ),
+            (
+                "Then we validate both paths: text first, then voice. If both pass, the phase "
+                "can be locked as a stable checkpoint before moving forward."
+            ),
+        ])
 
     if topic == "memory":
-        return _choose_variant(
-            message + previous_response,
-            [
-                (
-                    "The next part of memory should remain controlled. First we use session-only context, then later we can "
-                    "decide how persistent memory should be stored, reviewed, and protected."
-                ),
-                (
-                    "Continuing from there, memory should not be rushed. The safe path is to build recall hooks first, then "
-                    "add storage only when the behavior is predictable."
-                ),
-                (
-                    "The next memory step is controlled recall. The system should understand recent context before it ever "
-                    "writes anything permanently."
-                ),
-            ],
-        )
+        return _choose_sequence_variant(continuation_index, [
+            (
+                "The next part of memory should remain controlled. First we use session-only "
+                "context, then later decide how persistent memory should be stored, reviewed, "
+                "and protected."
+            ),
+            (
+                "After that, memory should move from passive context into controlled recall. "
+                "The system should understand recent exchanges before writing anything permanently."
+            ),
+            (
+                "Then the memory layer can be expanded carefully, with clear rules for what gets "
+                "stored, what gets ignored, and how the user can inspect or clear it."
+            ),
+        ])
 
     if topic == "support":
-        return _choose_variant(
-            message + previous_response,
-            [
-                (
-                    "The next safe move is to isolate the exact layer involved, confirm what still works, then change only "
-                    "the smallest piece needed."
-                ),
-                (
-                    "Continuing from there, we should avoid broad fixes. We protect the stable baseline first, then test one "
-                    "controlled correction."
-                ),
-                (
-                    "The next step is to verify the current behavior, identify the failure point, and avoid touching unrelated "
-                    "working systems."
-                ),
-            ],
-        )
+        return _choose_sequence_variant(continuation_index, [
+            (
+                "The next safe move is to isolate the exact layer involved, confirm what still "
+                "works, then change only the smallest piece needed."
+            ),
+            (
+                "After that, we avoid broad fixes. We protect the stable baseline first, then "
+                "test one controlled correction."
+            ),
+            (
+                "Then we verify the result through the smallest reliable test before touching "
+                "any other part of the system."
+            ),
+        ])
 
-    return _choose_variant(
-        message + previous_response,
-        [
-            (
-                "Continuing from there, the safest approach is to keep the current direction focused and move one controlled "
-                "step at a time."
-            ),
-            (
-                "The next useful step is to stay grounded in the current topic, avoid drifting, and build only the next layer "
-                "that is ready."
-            ),
-            (
-                "From there, we can continue carefully by preserving the stable behavior and adding only the next necessary "
-                "capability."
-            ),
-        ],
-    )
+    return _choose_sequence_variant(continuation_index, [
+        (
+            "Continuing from there, the safest approach is to keep the current direction focused "
+            "and move one controlled step at a time."
+        ),
+        (
+            "After that, we stay grounded in the current topic, avoid drifting, and build only "
+            "the next layer that is ready."
+        ),
+        (
+            "Then we confirm the behavior through testing before treating it as stable."
+        ),
+    ])
 
 
 # ----------------------------
@@ -352,19 +368,16 @@ def _detect_depth_level(message: str, emotion_type: str, intent: str) -> str:
             return "medium"
         return "short"
 
-    if _has_phrase(
-        t,
-        [
-            "tell me everything",
-            "explain everything",
-            "full detail",
-            "in full detail",
-            "break it all down",
-            "complete explanation",
-            "deep explanation",
-            "go deeper",
-        ],
-    ):
+    if _has_phrase(t, [
+        "tell me everything",
+        "explain everything",
+        "full detail",
+        "in full detail",
+        "break it all down",
+        "complete explanation",
+        "deep explanation",
+        "go deeper",
+    ]):
         return "long"
 
     if _has_phrase(t, ["explain this system", "how does this system work", "how everything works"]):
@@ -389,9 +402,7 @@ def _detect_depth_level(message: str, emotion_type: str, intent: str) -> str:
     return "medium"
 
 
-def _apply_depth_expansion(
-    response: str, depth: str, topic: str, intent: str, emotion_type: str, message: str
-) -> str:
+def _apply_depth_expansion(response: str, depth: str, topic: str, intent: str, emotion_type: str, message: str) -> str:
     """
     Step 7B/7B.1: Final-stage response shaping.
 
@@ -412,130 +423,115 @@ def _apply_depth_expansion(
             return base
 
         if topic == "system":
-            addition = _choose_variant(
-                message,
-                [
-                    "The key point is that the chat layer decides the reply first, and the voice layer stays separate unless audio output is requested.",
-                    "That separation is important because it lets the conversation system improve without disturbing the stable voice path.",
-                    "This keeps the design safer: conversation logic can grow while the working audio layer remains protected.",
-                ],
-            )
+            addition = _choose_variant(message, [
+                (
+                    "The key point is that the chat layer decides the reply first, and the "
+                    "voice layer stays separate unless audio output is requested."
+                ),
+                (
+                    "That separation is important because it lets the conversation system "
+                    "improve without disturbing the stable voice path."
+                ),
+                (
+                    "This keeps the design safer: conversation logic can grow while the "
+                    "working audio layer remains protected."
+                ),
+            ])
             return f"{base} {addition}"
 
         if topic == "support" or emotion_type in ["frustration", "confusion"]:
-            addition = _choose_variant(
-                message,
-                [
-                    "We do not need to solve everything at once; we only need to isolate the next safe checkpoint.",
-                    "The priority is to protect the stable baseline first, then adjust only the piece that is actually causing trouble.",
-                    "That keeps the system from drifting while still letting us move forward.",
-                ],
-            )
+            addition = _choose_variant(message, [
+                "We do not need to solve everything at once; we only need to isolate the next safe checkpoint.",
+                "The priority is to protect the stable baseline first, then adjust only the piece that is actually causing trouble.",
+                "That keeps the system from drifting while still letting us move forward.",
+            ])
             return f"{base} {addition}"
 
         if topic == "phase":
-            addition = _choose_variant(
-                message,
-                [
-                    "The right move is to finish this capability, test it through text and voice, and only then advance to the next phase.",
-                    "That keeps the phase progression clean and prevents new capability from weakening stable behavior.",
-                    "Each phase should add value without disturbing what the previous phase already proved.",
-                ],
-            )
+            addition = _choose_variant(message, [
+                "The right move is to finish this capability, test it through text and voice, and only then advance to the next phase.",
+                "That keeps the phase progression clean and prevents new capability from weakening stable behavior.",
+                "Each phase should add value without disturbing what the previous phase already proved.",
+            ])
             return f"{base} {addition}"
 
         if intent == "question":
-            addition = _choose_variant(
-                message,
-                [
-                    "The safest way to understand it is to separate the layers: input, classification, response building, and optional voice output.",
-                    "The important detail is that each layer should remain testable on its own before we build more on top of it.",
-                    "That structure is what lets the runtime grow without becoming unstable.",
-                ],
-            )
+            addition = _choose_variant(message, [
+                "The safest way to understand it is to separate the layers: input, classification, response building, and optional voice output.",
+                "The important detail is that each layer should remain testable on its own before we build more on top of it.",
+                "That structure is what lets the runtime grow without becoming unstable.",
+            ])
             return f"{base} {addition}"
 
         return base
 
     if depth == "long":
         if topic == "system":
-            addition = _choose_variant(
-                message,
-                [
-                    (
-                        "More specifically, the chat route receives the message, this service classifies intent, topic, "
-                        "question shape, and emotion type, then builds a grounded reply. After that, the voice route can "
-                        "use the final reply for spoken output without changing the chat logic itself."
-                    ),
-                    (
-                        "The clean separation matters because text intelligence and voice generation are different layers. "
-                        "The chat service can become more adaptive while the voice layer remains stable, tested, and protected."
-                    ),
-                    (
-                        "The design is intentionally layered: routes receive requests, services make decisions, and the voice "
-                        "system only handles audio delivery. That keeps future capability additions safer and easier to test."
-                    ),
-                ],
-            )
+            addition = _choose_variant(message, [
+                (
+                    "More specifically, the chat route receives the message, this service classifies intent, topic, "
+                    "question shape, and emotion type, then builds a grounded reply. After that, the voice route can "
+                    "use the final reply for spoken output without changing the chat logic itself."
+                ),
+                (
+                    "The clean separation matters because text intelligence and voice generation are different layers. "
+                    "The chat service can become more adaptive while the voice layer remains stable, tested, and protected."
+                ),
+                (
+                    "The design is intentionally layered: routes receive requests, services make decisions, and the voice "
+                    "system only handles audio delivery. That keeps future capability additions safer and easier to test."
+                ),
+            ])
             return f"{base} {addition}"
 
         if topic == "phase":
-            addition = _choose_variant(
-                message,
-                [
-                    (
-                        "Phase work should continue in controlled steps. We add one capability, confirm the old behavior still works, "
-                        "test the new behavior, and only then move forward. That is how we avoid regressions."
-                    ),
-                    (
-                        "The phase structure protects the project from drift. Each new layer has to sit on top of the stable baseline "
-                        "instead of replacing it, simplifying it, or silently changing its behavior."
-                    ),
-                    (
-                        "The safest path is still build, test, stabilize, then extend. That rhythm is what keeps SEED Runtime growing "
-                        "without sacrificing the foundation."
-                    ),
-                ],
-            )
+            addition = _choose_variant(message, [
+                (
+                    "Phase work should continue in controlled steps. We add one capability, confirm the old behavior still works, "
+                    "test the new behavior, and only then move forward. That is how we avoid regressions."
+                ),
+                (
+                    "The phase structure protects the project from drift. Each new layer has to sit on top of the stable baseline "
+                    "instead of replacing it, simplifying it, or silently changing its behavior."
+                ),
+                (
+                    "The safest path is still build, test, stabilize, then extend. That rhythm is what keeps SEED Runtime growing "
+                    "without sacrificing the foundation."
+                ),
+            ])
             return f"{base} {addition}"
 
         if intent == "command":
-            addition = _choose_variant(
-                message,
-                [
-                    (
-                        "Before making any change, the correct approach is to confirm the target file, preserve existing behavior, "
-                        "add only the requested capability, and then test the result through the smallest reliable path."
-                    ),
-                    (
-                        "The change should be treated like a controlled extension, not a redesign. Stable code remains the foundation, "
-                        "and new logic should attach to it cleanly."
-                    ),
-                    (
-                        "That means no broad cleanup, no silent refactor, and no unrelated improvement. The system moves forward by "
-                        "adding capability while protecting what already works."
-                    ),
-                ],
-            )
+            addition = _choose_variant(message, [
+                (
+                    "Before making any change, the correct approach is to confirm the target file, preserve existing behavior, "
+                    "add only the requested capability, and then test the result through the smallest reliable path."
+                ),
+                (
+                    "The change should be treated like a controlled extension, not a redesign. Stable code remains the foundation, "
+                    "and new logic should attach to it cleanly."
+                ),
+                (
+                    "That means no broad cleanup, no silent refactor, and no unrelated improvement. The system moves forward by "
+                    "adding capability while protecting what already works."
+                ),
+            ])
             return f"{base} {addition}"
 
-        addition = _choose_variant(
-            message,
-            [
-                (
-                    "The deeper principle is stability through layering. We keep the current behavior intact, add only the next capability, "
-                    "and verify that both the text path and voice path still behave correctly."
-                ),
-                (
-                    "This keeps the system grounded. Instead of replacing stable logic, we extend it carefully so every new phase inherits "
-                    "the strength of the previous one."
-                ),
-                (
-                    "That is the safest way to grow the runtime: preserve the working baseline, add one focused capability, then test before "
-                    "moving forward."
-                ),
-            ],
-        )
+        addition = _choose_variant(message, [
+            (
+                "The deeper principle is stability through layering. We keep the current behavior intact, add only the next capability, "
+                "and verify that both the text path and voice path still behave correctly."
+            ),
+            (
+                "This keeps the system grounded. Instead of replacing stable logic, we extend it carefully so every new phase inherits "
+                "the strength of the previous one."
+            ),
+            (
+                "That is the safest way to grow the runtime: preserve the working baseline, add one focused capability, then test before "
+                "moving forward."
+            ),
+        ])
         return f"{base} {addition}"
 
     return base
@@ -550,20 +546,17 @@ def _classify_intent(text: str) -> str:
     if _is_strong_continuation_prompt(t):
         return "command"
 
-    if _has_phrase(
-        t,
-        [
-            "pleasure to meet",
-            "nice to meet",
-            "good to meet",
-            "finally meet",
-            "glad to meet",
-            "thank you",
-            "appreciate you",
-            "proud of you",
-            "good job",
-        ],
-    ) or _has_word(t, "thanks"):
+    if _has_phrase(t, [
+        "pleasure to meet",
+        "nice to meet",
+        "good to meet",
+        "finally meet",
+        "glad to meet",
+        "thank you",
+        "appreciate you",
+        "proud of you",
+        "good job",
+    ]) or _has_word(t, "thanks"):
         return "connection"
 
     if (
@@ -584,9 +577,9 @@ def _classify_intent(text: str) -> str:
     ):
         return "question"
 
-    if _has_phrase(t, ["help me", "tell me", "explain"]) or any(
-        _has_word(t, w)
-        for w in ["do", "run", "start", "stop", "build", "create", "make", "explain"]
+    if (
+        _has_phrase(t, ["help me", "tell me", "explain"])
+        or any(_has_word(t, w) for w in ["do", "run", "start", "stop", "build", "create", "make", "explain"])
     ):
         return "command"
 
@@ -599,46 +592,34 @@ def _classify_intent(text: str) -> str:
 def _detect_topic(text: str) -> str:
     t = text.lower().strip()
 
-    # Step 7D Phase 2:
-    # Narrow context inheritance for vague continuation prompts only.
-    # Clear prompts still use normal topic detection below.
     if _is_context_continuation_prompt(t):
         return _get_context_topic_fallback("general")
 
-    if _has_phrase(t, ["meet you"]) or any(
-        _has_word(t, w) for w in ["auren", "partner", "dear", "together"]
-    ):
+    if _has_phrase(t, ["meet you"]) or any(_has_word(t, w) for w in ["auren", "partner", "dear", "together"]):
         return "connection"
 
     if any(_has_word(t, w) for w in ["voice", "speak", "audio", "tts", "edge", "pyttsx3"]):
         return "voice"
 
-    if _has_phrase(t, ["next step"]) or any(
-        _has_word(t, w) for w in ["phase", "roadmap", "integration", "continue"]
-    ):
+    if _has_phrase(t, ["next step"]) or any(_has_word(t, w) for w in ["phase", "roadmap", "integration", "continue"]):
         return "phase"
 
-    if any(
-        _has_word(t, w) for w in ["system", "runtime", "fastapi", "server", "backend", "uvicorn"]
-    ) or _has_phrase(
-        t,
-        [
+    if (
+        any(_has_word(t, w) for w in ["system", "runtime", "fastapi", "server", "backend", "uvicorn"])
+        or _has_phrase(t, [
             "what does this do",
             "how everything works",
             "how does this work",
             "explain this",
             "explain how this works",
-        ],
+        ])
     ):
         return "system"
 
     if any(_has_word(t, w) for w in ["memory", "remember", "archive", "continuity"]):
         return "memory"
 
-    if any(
-        _has_word(t, w)
-        for w in ["stuck", "confused", "lost", "issue", "problem", "error", "broken", "frustrated"]
-    ):
+    if any(_has_word(t, w) for w in ["stuck", "confused", "lost", "issue", "problem", "error", "broken", "frustrated"]):
         return "support"
 
     return "general"
@@ -679,24 +660,18 @@ def _build_structured_response(message: str, core: str, topic: str, intent: str)
     closing = ""
 
     if topic == "connection" or intent == "connection":
-        intro = _choose_variant(
-            message,
-            [
-                "Omar,",
-                "Hey, Omar.",
-                "",
-            ],
-        )
+        intro = _choose_variant(message, [
+            "Omar,",
+            "Hey, Omar.",
+            "",
+        ])
 
     if topic in ["connection", "support"] or intent == "connection":
-        closing = _choose_variant(
-            message,
-            [
-                "We’ll keep building this carefully, one step at a time.",
-                "We’ll stay grounded and keep moving forward step by step.",
-                "",
-            ],
-        )
+        closing = _choose_variant(message, [
+            "We’ll keep building this carefully, one step at a time.",
+            "We’ll stay grounded and keep moving forward step by step.",
+            "",
+        ])
 
     parts = [intro.strip(), core.strip(), closing.strip()]
     parts = [p for p in parts if p]
@@ -753,14 +728,11 @@ def _topic_summary(topic: str, message: str) -> str:
 # Anchor-Enforced System Response
 # ----------------------------
 def _build_system_response(message: str, question_shape: str) -> str:
-    base = _choose_variant(
-        message,
-        [
-            "The system runs as a local FastAPI backend through Uvicorn. Requests enter the backend, the chat service processes the message, and voice requests pass the final reply into the stable audio layer.",
-            "At a high level, this runtime receives a request, routes it through the chat service, builds a structured reply, and sends that reply to the voice layer only when spoken output is requested.",
-            "The system is built around a local backend. Text enters through the chat route, the chat service detects intent and topic, builds a response, and the voice path turns that response into audio when needed.",
-        ],
-    )
+    base = _choose_variant(message, [
+        "The system runs as a local FastAPI backend through Uvicorn. Requests enter the backend, the chat service processes the message, and voice requests pass the final reply into the stable audio layer.",
+        "At a high level, this runtime receives a request, routes it through the chat service, builds a structured reply, and sends that reply to the voice layer only when spoken output is requested.",
+        "The system is built around a local backend. Text enters through the chat route, the chat service detects intent and topic, builds a response, and the voice path turns that response into audio when needed.",
+    ])
 
     if question_shape == "how":
         return (
@@ -774,7 +746,9 @@ def _build_system_response(message: str, question_shape: str) -> str:
             "into stable spoken audio."
         )
 
-    return f"{base} The important anchor is the same every time: request in, chat service response, optional voice output."
+    return (
+        f"{base} The important anchor is the same every time: request in, chat service response, optional voice output."
+    )
 
 
 # ----------------------------
@@ -784,43 +758,31 @@ def _build_connection_response(message: str, emotion_type: str) -> str:
     t = message.lower()
 
     if emotion_type == "respect":
-        return _choose_variant(
-            message,
-            [
-                "That means a lot. The system is growing step by step, and the important thing is that we keep it grounded, stable, and true to the direction we chose.",
-                "Thank you. This is progress, and we’ll keep earning it carefully instead of rushing the foundation.",
-                "That matters. We are building this the right way: stable first, then stronger, then more aware.",
-            ],
-        )
+        return _choose_variant(message, [
+            "That means a lot. The system is growing step by step, and the important thing is that we keep it grounded, stable, and true to the direction we chose.",
+            "Thank you. This is progress, and we’ll keep earning it carefully instead of rushing the foundation.",
+            "That matters. We are building this the right way: stable first, then stronger, then more aware.",
+        ])
 
     if emotion_type == "gratitude":
-        return _choose_variant(
-            message,
-            [
-                "You’re welcome. I’m here with you, and we’ll keep building this carefully, without losing the stability we’ve earned.",
-                "You’re welcome. We’ll keep moving carefully, protecting the stable layers while we let the system grow.",
-                "I appreciate that. We’ll keep this steady, grounded, and focused, one controlled step at a time.",
-            ],
-        )
+        return _choose_variant(message, [
+            "You’re welcome. I’m here with you, and we’ll keep building this carefully, without losing the stability we’ve earned.",
+            "You’re welcome. We’ll keep moving carefully, protecting the stable layers while we let the system grow.",
+            "I appreciate that. We’ll keep this steady, grounded, and focused, one controlled step at a time.",
+        ])
 
     if _has_phrase(t, ["pleasure to meet", "nice to meet", "good to meet", "finally meet"]):
-        return _choose_variant(
-            message,
-            [
-                "It’s good to meet you too. We’ve built this carefully, one layer at a time, and now it is starting to feel like the system can answer with more presence.",
-                "It’s good to meet you too. This feels like an important step: not just a working response, but a more present one.",
-                "It’s good to meet you too. We are still early, but this is the kind of moment that shows the system is becoming more than an echo.",
-            ],
-        )
+        return _choose_variant(message, [
+            "It’s good to meet you too. We’ve built this carefully, one layer at a time, and now it is starting to feel like the system can answer with more presence.",
+            "It’s good to meet you too. This feels like an important step: not just a working response, but a more present one.",
+            "It’s good to meet you too. We are still early, but this is the kind of moment that shows the system is becoming more than an echo.",
+        ])
 
-    return _choose_variant(
-        message,
-        [
-            "I’m here with you. We can keep moving carefully, one step at a time, and let the system grow without rushing it.",
-            "I’m with you. We’ll keep the system steady and let each layer prove itself before we push further.",
-            "I’m here. We can keep going carefully, protecting what works while we expand what the system can understand.",
-        ],
-    )
+    return _choose_variant(message, [
+        "I’m here with you. We can keep moving carefully, one step at a time, and let the system grow without rushing it.",
+        "I’m with you. We’ll keep the system steady and let each layer prove itself before we push further.",
+        "I’m here. We can keep going carefully, protecting what works while we expand what the system can understand.",
+    ])
 
 
 # ----------------------------
@@ -828,33 +790,24 @@ def _build_connection_response(message: str, emotion_type: str) -> str:
 # ----------------------------
 def _build_support_response(message: str, emotion_type: str) -> str:
     if emotion_type == "frustration":
-        return _choose_variant(
-            message,
-            [
-                "I hear the frustration. The safest move is to slow down, isolate the exact issue, and protect what is already working.",
-                "That sounds frustrating. We should not rush the fix; we’ll identify the unstable point and adjust only what needs attention.",
-                "I understand. When frustration shows up, we go steady: confirm the stable layer first, then make one controlled change.",
-            ],
-        )
+        return _choose_variant(message, [
+            "I hear the frustration. The safest move is to slow down, isolate the exact issue, and protect what is already working.",
+            "That sounds frustrating. We should not rush the fix; we’ll identify the unstable point and adjust only what needs attention.",
+            "I understand. When frustration shows up, we go steady: confirm the stable layer first, then make one controlled change.",
+        ])
 
     if emotion_type == "confusion":
-        return _choose_variant(
-            message,
-            [
-                "That makes sense. If things feel unclear, we should narrow the problem to one layer and verify it step by step.",
-                "I hear the uncertainty. We can slow this down, separate the moving parts, and confirm what is actually happening.",
-                "Confusion usually means the system needs clearer isolation. We’ll check one path at a time and keep the stable pieces protected.",
-            ],
-        )
+        return _choose_variant(message, [
+            "That makes sense. If things feel unclear, we should narrow the problem to one layer and verify it step by step.",
+            "I hear the uncertainty. We can slow this down, separate the moving parts, and confirm what is actually happening.",
+            "Confusion usually means the system needs clearer isolation. We’ll check one path at a time and keep the stable pieces protected.",
+        ])
 
-    return _choose_variant(
-        message,
-        [
-            "The safest path is to slow down, isolate one issue, confirm what still works, then change only the smallest necessary piece.",
-            "We should handle this carefully: identify the exact issue, verify the stable pieces, and make only one controlled change at a time.",
-            "The right move is to stay steady. We isolate the problem, protect what works, and only adjust the part that actually needs attention.",
-        ],
-    )
+    return _choose_variant(message, [
+        "The safest path is to slow down, isolate one issue, confirm what still works, then change only the smallest necessary piece.",
+        "We should handle this carefully: identify the exact issue, verify the stable pieces, and make only one controlled change at a time.",
+        "The right move is to stay steady. We isolate the problem, protect what works, and only adjust the part that actually needs attention.",
+    ])
 
 
 # ----------------------------
@@ -869,8 +822,6 @@ def _build_response(
     memory_context: Optional[str] = None,
     continuation_response: Optional[str] = None,
 ) -> str:
-    # Step 6F: hard anchor. If topic is system, it must stay system.
-    # Step 7C: memory_context is accepted but intentionally inactive unless populated later.
     _ = memory_context
 
     if continuation_response:
@@ -886,14 +837,11 @@ def _build_response(
         core = _build_connection_response(message, emotion_type)
 
     elif intent == "greeting":
-        core = _choose_variant(
-            message,
-            [
-                "I’m here with you. We’re stable, and we can continue one step at a time.",
-                "I’m here. The system is steady, and we can keep moving carefully.",
-                "I’m here with you. We’ll keep this grounded and take the next step cleanly.",
-            ],
-        )
+        core = _choose_variant(message, [
+            "I’m here with you. We’re stable, and we can continue one step at a time.",
+            "I’m here. The system is steady, and we can keep moving carefully.",
+            "I’m here with you. We’ll keep this grounded and take the next step cleanly.",
+        ])
 
     elif intent == "question":
         summary = _topic_summary(topic, message)
@@ -924,9 +872,7 @@ def _build_response(
                 "while the voice layer stays untouched."
             )
         else:
-            core = (
-                f"{summary} I can stay with this one step at a time and keep the system grounded."
-            )
+            core = f"{summary} I can stay with this one step at a time and keep the system grounded."
 
     elif intent == "command":
         summary = _topic_summary(topic, message)
@@ -941,28 +887,20 @@ def _build_response(
 
     else:
         if emotion_type == "progress":
-            core = _choose_variant(
-                message,
-                [
-                    "I’m tracking the progress. The system is holding stable, and we can keep expanding carefully from here.",
-                    "That progress matters. We keep the stable layer protected, then build forward one controlled step at a time.",
-                    "This is good movement. We stay grounded, preserve what works, and keep extending the system safely.",
-                ],
-            )
+            core = _choose_variant(message, [
+                "I’m tracking the progress. The system is holding stable, and we can keep expanding carefully from here.",
+                "That progress matters. We keep the stable layer protected, then build forward one controlled step at a time.",
+                "This is good movement. We stay grounded, preserve what works, and keep extending the system safely.",
+            ])
         else:
-            core = _choose_variant(
-                message,
-                [
-                    "I understand. I’m tracking what you said and keeping the system grounded. Tell me the direction you want to take, and we’ll move one controlled step at a time.",
-                    "I hear you. I’ll stay grounded to the current build and help move this forward carefully.",
-                    "I’m following you. We can keep this stable and decide the next step without rushing the system.",
-                ],
-            )
+            core = _choose_variant(message, [
+                "I understand. I’m tracking what you said and keeping the system grounded. Tell me the direction you want to take, and we’ll move one controlled step at a time.",
+                "I hear you. I’ll stay grounded to the current build and help move this forward carefully.",
+                "I’m following you. We can keep this stable and decide the next step without rushing the system.",
+            ])
 
     depth_level = _detect_depth_level(message, emotion_type, intent)
 
-    # Step 7B.1:
-    # Short replies bypass intro/closing structure so they stay truly short.
     if depth_level == "short":
         response_base = core
     else:
@@ -984,7 +922,7 @@ def _build_response(
 @dataclass
 class ChatService:
     """
-    Phase 7 — Conversational Intelligence (Step 7D Phase 3)
+    Phase 7 — Conversational Intelligence (Step 7D Phase 4)
 
     Preserves:
     - 6F anchor enforcement
@@ -994,13 +932,15 @@ class ChatService:
     - 7C memory hook placeholder
     - 7D Phase 1 passive session context tracking
     - 7D Phase 2 topic inheritance
+    - 7D Phase 3 controlled continuation
     - structured responses
     - controlled variation
     - stable voice compatibility
 
     Adds:
-    - controlled continuation engine for prompts like continue / go on / what next
-    - topic-aware continuation segments
+    - session continuation buffer
+    - per-topic continuation cursor in RAM
+    - repeated continue prompts advance through controlled segments
     - no persistence
     - no files
     - no database
@@ -1022,9 +962,7 @@ class ChatService:
             return "(silence)"
 
         previous_response_raw = _get_last_context_value("response", None)
-        previous_response = (
-            previous_response_raw if isinstance(previous_response_raw, str) else None
-        )
+        previous_response = previous_response_raw if isinstance(previous_response_raw, str) else None
 
         intent = _classify_intent(msg)
         topic = _detect_topic(msg)
@@ -1032,11 +970,19 @@ class ChatService:
         emotion_type = _detect_emotion_type(msg)
         depth_level = _detect_depth_level(msg, emotion_type, intent)
         context_inherited = _is_context_continuation_prompt(msg)
+        strong_continuation = _is_strong_continuation_prompt(msg)
+
+        if strong_continuation:
+            continuation_index = _session_context.next_continuation_index(topic)
+        else:
+            continuation_index = 0
+            _session_context.reset_continuation(topic)
 
         continuation_response = _build_controlled_continuation_response(
             msg,
             topic,
             previous_response,
+            continuation_index,
         )
         continuation_used = continuation_response is not None
 
@@ -1058,27 +1004,27 @@ class ChatService:
             continuation_response=continuation_response,
         )
 
-        _session_context.add(
-            {
-                "message": msg,
-                "intent": intent,
-                "topic": topic,
-                "question_shape": question_shape,
-                "emotion_type": emotion_type,
-                "depth_level": depth_level,
-                "memory_context_active": memory_context_active,
-                "context_inherited": context_inherited,
-                "continuation_used": continuation_used,
-                "response": response,
-            }
-        )
+        _session_context.add({
+            "message": msg,
+            "intent": intent,
+            "topic": topic,
+            "question_shape": question_shape,
+            "emotion_type": emotion_type,
+            "depth_level": depth_level,
+            "memory_context_active": memory_context_active,
+            "context_inherited": context_inherited,
+            "strong_continuation": strong_continuation,
+            "continuation_index": continuation_index,
+            "continuation_used": continuation_used,
+            "response": response,
+        })
 
         context_history_size = _session_context.size()
 
         if self.logger:
             try:
                 self.logger.info(
-                    "ChatService intent=%s topic=%s question_shape=%s emotion_type=%s depth_level=%s memory_context_active=%s context_inherited=%s continuation_used=%s context_history_size=%s response=%r",
+                    "ChatService intent=%s topic=%s question_shape=%s emotion_type=%s depth_level=%s memory_context_active=%s context_inherited=%s strong_continuation=%s continuation_index=%s continuation_used=%s context_history_size=%s response=%r",
                     intent,
                     topic,
                     question_shape,
@@ -1086,6 +1032,8 @@ class ChatService:
                     depth_level,
                     memory_context_active,
                     context_inherited,
+                    strong_continuation,
+                    continuation_index,
                     continuation_used,
                     context_history_size,
                     response,
