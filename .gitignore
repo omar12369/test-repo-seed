@@ -1,0 +1,31 @@
+# Python / build
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.env/        # virtualenvs
+venv/
+.venv/
+
+# Local config & secrets
+.env
+
+# Logs & data
+logs/
+data/
+audio/
+*.wav
+*.mp3
+
+# Runtime artifacts / generated files
+voice_history.json
+.env.backup
+backups/
+*.bak
+*.patch
+.ruff_cache/
+.pytest_cache/
+.mypy_cache/
+
+# VS Code
+.vscode/

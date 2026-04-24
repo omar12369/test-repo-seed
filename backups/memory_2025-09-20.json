@@ -1,0 +1,1024 @@
+[
+  {
+    "ts": "2025-08-21T21:12:27.237430Z",
+    "role": "user",
+    "text": "Hello from Omar (memory test)."
+  },
+  {
+    "ts": "2025-08-21T21:14:40.096508Z",
+    "role": "user",
+    "text": "Can you hear me, Auren?"
+  },
+  {
+    "ts": "2025-08-21T21:14:40.100718Z",
+    "role": "assistant",
+    "text": "I received: “Can you hear me, Auren?”. Length=23"
+  },
+  {
+    "ts": "2025-08-21T23:59:16.729832Z",
+    "role": "user",
+    "text": "string"
+  },
+  {
+    "ts": "2025-08-21T23:59:16.734712Z",
+    "role": "assistant",
+    "text": "I received: “string”. Length=6"
+  },
+  {
+    "ts": "2025-08-21T23:59:22.940380Z",
+    "role": "user",
+    "text": "string"
+  },
+  {
+    "ts": "2025-08-22T00:27:34.427190Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-22T00:27:34.427163Z"
+  },
+  {
+    "ts": "2025-08-22T00:27:34.431557Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-22T00:27:34.431534Z"
+  },
+  {
+    "ts": "2025-08-22T00:27:34.528881Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-22T00:27:34.528867Z"
+  },
+  {
+    "ts": "2025-08-22T00:27:54.009350Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-22T00:27:54.009335Z"
+  },
+  {
+    "ts": "2025-08-22T00:28:04.537316Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-22T00:28:04.537301Z"
+  },
+  {
+    "ts": "2025-08-22T00:28:24.029728Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-22T00:28:24.029708Z"
+  },
+  {
+    "ts": "2025-08-22T00:28:34.549936Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-22T00:28:34.549921Z"
+  },
+  {
+    "ts": "2025-08-22T00:28:54.051458Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-22T00:28:54.051444Z"
+  },
+  {
+    "ts": "2025-08-22T00:29:04.559712Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-22T00:29:04.559668Z"
+  },
+  {
+    "ts": "2025-08-22T00:29:24.068375Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-22T00:29:24.068365Z"
+  },
+  {
+    "ts": "2025-08-22T00:29:34.589528Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-22T00:29:34.589511Z"
+  },
+  {
+    "ts": "2025-08-22T00:29:54.090755Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-22T00:29:54.090743Z"
+  },
+  {
+    "ts": "2025-08-22T00:30:04.613075Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-22T00:30:04.613056Z"
+  },
+  {
+    "ts": "2025-08-22T00:30:24.108002Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-22T00:30:24.107985Z"
+  },
+  {
+    "ts": "2025-08-22T00:30:34.620830Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-22T00:30:34.620813Z"
+  },
+  {
+    "ts": "2025-08-22T00:30:54.121582Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-22T00:30:54.121557Z"
+  },
+  {
+    "ts": "2025-08-22T00:31:04.630699Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-22T00:31:04.630685Z"
+  },
+  {
+    "ts": "2025-08-22T00:31:24.141937Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-22T00:31:24.141922Z"
+  },
+  {
+    "ts": "2025-08-22T00:31:34.653962Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-22T00:31:34.653932Z"
+  },
+  {
+    "ts": "2025-08-22T00:31:54.161236Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-22T00:31:54.161185Z"
+  },
+  {
+    "ts": "2025-08-22T00:32:04.660687Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-22T00:32:04.660675Z"
+  },
+  {
+    "ts": "2025-08-22T00:32:24.179506Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-22T00:32:24.179489Z"
+  },
+  {
+    "ts": "2025-08-22T00:32:34.682721Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-22T00:32:34.682695Z"
+  },
+  {
+    "ts": "2025-08-22T00:32:54.206440Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-22T00:32:54.206428Z"
+  },
+  {
+    "ts": "2025-08-22T00:33:04.697449Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-22T00:33:04.697435Z"
+  },
+  {
+    "ts": "2025-08-22T00:33:24.226741Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-22T00:33:24.226730Z"
+  },
+  {
+    "ts": "2025-08-22T00:38:04.182358Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-22T00:38:04.182342Z"
+  },
+  {
+    "ts": "2025-08-22T00:38:04.194428Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-22T00:38:04.194410Z"
+  },
+  {
+    "ts": "2025-08-22T00:38:34.200826Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-22T00:38:34.200815Z"
+  },
+  {
+    "ts": "2025-08-22T00:38:39.500943Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-22T00:38:39.500929Z"
+  },
+  {
+    "ts": "2025-08-22T00:39:09.519730Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-22T00:39:09.519712Z"
+  },
+  {
+    "ts": "2025-08-22T00:39:14.558319Z",
+    "role": "user",
+    "text": "string"
+  },
+  {
+    "ts": "2025-08-22T00:39:14.574110Z",
+    "role": "assistant",
+    "text": "I received: “string”. Length=6"
+  },
+  {
+    "ts": "2025-08-22T00:39:21.427738Z",
+    "role": "user",
+    "text": "string"
+  },
+  {
+    "ts": "2025-08-22T00:39:39.528704Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-22T00:39:39.528670Z"
+  },
+  {
+    "ts": "2025-08-22T00:40:09.546831Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-22T00:40:09.546812Z"
+  },
+  {
+    "ts": "2025-08-22T00:40:39.571006Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-22T00:40:39.570983Z"
+  },
+  {
+    "ts": "2025-08-22T00:41:09.581490Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-22T00:41:09.581480Z"
+  },
+  {
+    "ts": "2025-08-22T00:41:39.592390Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-22T00:41:39.592375Z"
+  },
+  {
+    "ts": "2025-08-22T00:42:09.611604Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-22T00:42:09.611584Z"
+  },
+  {
+    "ts": "2025-08-22T00:42:39.629376Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-22T00:42:39.629362Z"
+  },
+  {
+    "ts": "2025-08-22T00:43:09.651880Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-22T00:43:09.651869Z"
+  },
+  {
+    "ts": "2025-08-22T00:43:39.669265Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-22T00:43:39.669239Z"
+  },
+  {
+    "ts": "2025-08-22T00:44:09.690832Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-22T00:44:09.690822Z"
+  },
+  {
+    "ts": "2025-08-22T00:44:39.704880Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-22T00:44:39.704831Z"
+  },
+  {
+    "ts": "2025-08-22T00:45:09.717248Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-22T00:45:09.717238Z"
+  },
+  {
+    "ts": "2025-08-22T00:45:39.729991Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-22T00:45:39.729982Z"
+  },
+  {
+    "ts": "2025-08-22T00:46:09.740236Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-22T00:46:09.740219Z"
+  },
+  {
+    "ts": "2025-08-22T00:46:39.751955Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-22T00:46:39.751945Z"
+  },
+  {
+    "ts": "2025-08-22T00:47:09.763024Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-22T00:47:09.763013Z"
+  },
+  {
+    "ts": "2025-08-22T00:47:39.774961Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-22T00:47:39.774950Z"
+  },
+  {
+    "ts": "2025-08-22T00:48:09.784747Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-22T00:48:09.784730Z"
+  },
+  {
+    "ts": "2025-08-22T00:48:39.796451Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-22T00:48:39.796435Z"
+  },
+  {
+    "ts": "2025-08-22T00:49:09.826863Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-22T00:49:09.826845Z"
+  },
+  {
+    "ts": "2025-08-22T00:49:39.841921Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-22T00:49:39.841911Z"
+  },
+  {
+    "ts": "2025-08-22T00:50:09.864564Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-22T00:50:09.864552Z"
+  },
+  {
+    "ts": "2025-08-22T00:50:39.884670Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-22T00:50:39.884637Z"
+  },
+  {
+    "ts": "2025-08-22T00:51:09.906263Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-22T00:51:09.906245Z"
+  },
+  {
+    "ts": "2025-08-22T00:51:39.923583Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-22T00:51:39.923569Z"
+  },
+  {
+    "ts": "2025-08-22T00:52:09.943210Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-22T00:52:09.943199Z"
+  },
+  {
+    "ts": "2025-08-22T00:52:39.959824Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-22T00:52:39.959813Z"
+  },
+  {
+    "ts": "2025-08-22T00:53:09.985737Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-22T00:53:09.985718Z"
+  },
+  {
+    "ts": "2025-08-22T00:53:40.008986Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-22T00:53:40.008972Z"
+  },
+  {
+    "ts": "2025-08-22T00:54:10.022042Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-22T00:54:10.022027Z"
+  },
+  {
+    "ts": "2025-08-22T00:54:40.035269Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-22T00:54:40.035254Z"
+  },
+  {
+    "ts": "2025-08-22T00:55:10.047242Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-22T00:55:10.047227Z"
+  },
+  {
+    "ts": "2025-08-22T00:55:40.059203Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-22T00:55:40.059186Z"
+  },
+  {
+    "ts": "2025-08-22T00:56:10.079286Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-22T00:56:10.079269Z"
+  },
+  {
+    "ts": "2025-08-22T00:56:40.101318Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-22T00:56:40.101287Z"
+  },
+  {
+    "ts": "2025-08-22T00:57:10.120221Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-22T00:57:10.120205Z"
+  },
+  {
+    "ts": "2025-08-22T00:57:40.134969Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-22T00:57:40.134955Z"
+  },
+  {
+    "ts": "2025-08-22T00:58:10.145751Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-22T00:58:10.145740Z"
+  },
+  {
+    "ts": "2025-08-22T00:58:40.164235Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-22T00:58:40.164226Z"
+  },
+  {
+    "ts": "2025-08-22T00:59:10.183549Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-22T00:59:10.183533Z"
+  },
+  {
+    "ts": "2025-08-22T00:59:40.206769Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-22T00:59:40.206756Z"
+  },
+  {
+    "ts": "2025-08-22T01:00:10.229992Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-22T01:00:10.229979Z"
+  },
+  {
+    "ts": "2025-08-22T01:00:40.254388Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-22T01:00:40.254379Z"
+  },
+  {
+    "ts": "2025-08-22T01:01:10.272369Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-22T01:01:10.272357Z"
+  },
+  {
+    "ts": "2025-08-22T01:01:40.289389Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-22T01:01:40.289377Z"
+  },
+  {
+    "ts": "2025-08-22T01:02:10.311930Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-22T01:02:10.311893Z"
+  },
+  {
+    "ts": "2025-08-22T01:02:13.388072Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-22T01:02:13.388057Z"
+  },
+  {
+    "ts": "2025-08-22T01:07:13.399742Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-22T01:07:13.399724Z"
+  },
+  {
+    "ts": "2025-08-22T01:07:23.885479Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-22T01:07:23.885463Z"
+  },
+  {
+    "ts": "2025-08-22T01:12:23.914055Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-22T01:12:23.914037Z"
+  },
+  {
+    "ts": "2025-08-22T01:17:23.939624Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-22T01:17:23.939610Z"
+  },
+  {
+    "ts": "2025-08-25T16:27:56.952043Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-25T16:27:56.952030Z"
+  },
+  {
+    "ts": "2025-08-25T16:32:56.960885Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-25T16:32:56.960852Z"
+  },
+  {
+    "ts": "2025-08-25T16:37:56.973571Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-25T16:37:56.973557Z"
+  },
+  {
+    "ts": "2025-08-25T16:38:13.320452Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-25T16:38:13.320437Z"
+  },
+  {
+    "ts": "2025-08-25T16:38:31.415673Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-25T16:38:31.415653Z"
+  },
+  {
+    "ts": "2025-08-25T16:42:12.990228Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-25T16:42:12.990213Z"
+  },
+  {
+    "ts": "2025-08-25T16:44:01.748318Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-25T16:44:01.748304Z"
+  },
+  {
+    "ts": "2025-08-25T16:47:39.160407Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-25T16:47:39.160388Z"
+  },
+  {
+    "ts": "2025-08-25T16:48:11.814435Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-25T16:48:11.814423Z"
+  },
+  {
+    "ts": "2025-08-25T16:49:09.441927Z",
+    "role": "user",
+    "text": "Hello SEED memory!"
+  },
+  {
+    "ts": "2025-08-25T16:52:39.162927Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-25T16:52:39.162912Z"
+  },
+  {
+    "ts": "2025-08-25T16:53:07.057753Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-25T16:53:07.057736Z"
+  },
+  {
+    "ts": "2025-08-25T16:53:07.094869Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-25T16:53:07.094855Z"
+  },
+  {
+    "ts": "2025-08-25T16:53:32.643929Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-25T16:53:32.643918Z"
+  },
+  {
+    "ts": "2025-08-25T16:58:07.110037Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-25T16:58:07.110023Z"
+  },
+  {
+    "ts": "2025-08-25T16:58:32.655591Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-25T16:58:32.655570Z"
+  },
+  {
+    "ts": "2025-08-25T17:03:07.125263Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-25T17:03:07.125247Z"
+  },
+  {
+    "ts": "2025-08-25T17:03:32.663438Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-25T17:03:32.663418Z"
+  },
+  {
+    "ts": "2025-08-25T17:08:07.143058Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-25T17:08:07.143043Z"
+  },
+  {
+    "ts": "2025-08-25T17:08:32.680952Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-25T17:08:32.680939Z"
+  },
+  {
+    "ts": "2025-08-25T17:13:07.161059Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-25T17:13:07.161043Z"
+  },
+  {
+    "ts": "2025-08-25T17:13:32.701210Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-25T17:13:32.701164Z"
+  },
+  {
+    "ts": "2025-08-25T17:18:07.183780Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-25T17:18:07.183766Z"
+  },
+  {
+    "ts": "2025-08-25T17:18:32.721034Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-25T17:18:32.721023Z"
+  },
+  {
+    "ts": "2025-08-25T17:23:07.203531Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-25T17:23:07.203515Z"
+  },
+  {
+    "ts": "2025-08-25T17:23:32.739635Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-25T17:23:32.739588Z"
+  },
+  {
+    "ts": "2025-08-25T17:28:07.220967Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-25T17:28:07.220951Z"
+  },
+  {
+    "ts": "2025-08-25T17:28:32.752195Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-25T17:28:32.752161Z"
+  },
+  {
+    "id": "1de0a9b6-712e-4ed8-8adc-1e1516956dda",
+    "ts": "2025-08-25T17:29:17.839632Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-25T17:29:17.839598Z"
+  },
+  {
+    "id": "23b5ac6d-448b-4c73-990c-ce7733a8cfa8",
+    "ts": "2025-08-25T17:34:17.852921Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-25T17:34:17.852835Z"
+  },
+  {
+    "id": "f4cd2aea-f575-4b26-9a12-4d179e1782bd",
+    "ts": "2025-08-25T17:34:17.868034Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-25T17:34:17.867947Z"
+  },
+  {
+    "id": "71dd371a-08b2-4101-a355-5300d959d3f8",
+    "ts": "2025-08-25T17:36:45.192722Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-25T17:36:45.192681Z"
+  },
+  {
+    "id": "f0537210-1aea-4a1a-bf41-9b636539a3c3",
+    "ts": "2025-08-25T17:37:06.928612Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-25T17:37:06.928583Z"
+  },
+  {
+    "id": "91af1af2-ca8f-4ae2-88be-5a52fd5b82ff",
+    "ts": "2025-08-25T17:38:25.326829Z",
+    "role": "user",
+    "text": "Entry with UUID id"
+  },
+  {
+    "id": "5f0b4a48-0587-4ee7-a3b5-c2dcb75be5e1",
+    "ts": "2025-08-25T17:38:29.000465Z",
+    "role": "user",
+    "text": "Entry with UUID id"
+  },
+  {
+    "id": "d3b22708-dc28-4424-9ed0-dc76b8c0050c",
+    "ts": "2025-08-25T17:41:45.212758Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-25T17:41:45.212710Z"
+  },
+  {
+    "id": "66ad46f8-2d72-42b8-a291-868ff279e95f",
+    "ts": "2025-08-25T17:42:06.945256Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-25T17:42:06.945190Z"
+  },
+  {
+    "id": "93d8daf0-d9a8-43ba-8162-af564cce5e89",
+    "ts": "2025-08-25T17:45:43.829440Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-25T17:45:43.829354Z"
+  },
+  {
+    "id": "9ba97e1d-7cb6-4d33-9421-3197fe9270b2",
+    "ts": "2025-08-25T20:29:19.576932Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-25T20:29:19.576879Z"
+  },
+  {
+    "id": "01580f6c-6279-43be-bf2d-4d3f24d95b78",
+    "ts": "2025-08-25T20:34:20.103633Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-25T20:34:20.103586Z"
+  },
+  {
+    "id": "b38713ac-6ee1-421c-aa2e-c3cc28abf1d0",
+    "ts": "2025-08-25T20:34:20.134483Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-25T20:34:20.134434Z"
+  },
+  {
+    "id": "c89f8bb3-cc13-4c7a-97e8-245c02348aa3",
+    "ts": "2025-08-25T20:39:20.122388Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-25T20:39:20.122333Z"
+  },
+  {
+    "id": "8061f445-750e-45c0-9239-fccb44f2c427",
+    "ts": "2025-08-25T20:39:20.153078Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-25T20:39:20.153032Z"
+  },
+  {
+    "id": "10607f04-6aca-4dcd-9f54-8723ace2fcb6",
+    "ts": "2025-08-25T20:44:20.159027Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-25T20:44:20.158958Z"
+  },
+  {
+    "id": "f5874060-0356-4fe7-8440-f7041d35e381",
+    "ts": "2025-08-25T20:44:20.190082Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-25T20:44:20.189976Z"
+  },
+  {
+    "id": "193d8f0e-929a-4bdc-9c1e-3a2d4e15db7a",
+    "ts": "2025-08-25T20:46:58.441613Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-25T20:46:58.441580Z"
+  },
+  {
+    "id": "84ff51d1-8f51-41cc-a3cc-45034450324c",
+    "ts": "2025-08-25T20:46:58.475285Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-25T20:46:58.475233Z"
+  },
+  {
+    "id": "eb2966d7-9424-4caa-951d-b15e5041136f",
+    "ts": "2025-08-25T20:47:38.988197Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-25T20:47:38.988165Z"
+  },
+  {
+    "id": "35108c70-c726-486f-af0d-b17588192817",
+    "ts": "2025-08-25T20:51:43.267327Z",
+    "role": "system",
+    "text": "[FETCH]\nurl: https://api.github.com\nstatus: 200\nkind: json\npreview:\n{\"current_user_url\": \"https://api.github.com/user\", \"current_user_authorizations_html_url\": \"https://github.com/settings/connections/applications{/client_id}\", \"authorizations_url\": \"https://api.github.com/authorizations\", \"code_search_url\": \"https://api.github.com/search/code?q={query}{&page,per_page,sort,order}\", \"commit_search_url\": \"https://api.github.com/search/commits?q={query}{&page,per_page,sort,order}\", \"emails_url\": \"https://api.github.com/user/emails\", \"emojis_url\": \"https://api.github.com/emojis\", \"events_url\": \"https://api.github.com/events\", \"feeds_url\": \"https://api.github.com/f"
+  },
+  {
+    "id": "e065630e-e22e-413c-bb27-bb92c7f359c6",
+    "ts": "2025-08-25T20:52:39.011488Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-25T20:52:39.011452Z"
+  },
+  {
+    "id": "94561335-3c42-4fcb-8db3-ac6de18a9e4c",
+    "ts": "2025-08-25T20:57:39.035251Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-25T20:57:39.035203Z"
+  },
+  {
+    "id": "78ba0ae1-67bb-47cd-a28a-579be55f2d98",
+    "ts": "2025-08-25T20:58:09.723930Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-25T20:58:09.723893Z"
+  },
+  {
+    "id": "a9cc2230-8cad-4e6e-8b00-284c9ecd5c34",
+    "ts": "2025-08-25T20:58:56.634427Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-25T20:58:56.634373Z"
+  },
+  {
+    "id": "cf604069-6ae0-42f5-8c34-8450cbca128c",
+    "ts": "2025-08-25T20:59:11.942250Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-25T20:59:11.942214Z"
+  },
+  {
+    "id": "26258d97-c55c-42a0-a507-4cf65523b092",
+    "ts": "2025-08-25T20:59:36.519023Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-25T20:59:36.518983Z"
+  },
+  {
+    "id": "1404cad0-39b7-492e-81c2-d87ac390fb94",
+    "ts": "2025-08-25T21:04:36.550551Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-25T21:04:36.550483Z"
+  },
+  {
+    "id": "a5bd1bab-2602-4512-95b0-fea7c8ad1c7a",
+    "ts": "2025-08-25T21:04:43.612385Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-25T21:04:43.612348Z"
+  },
+  {
+    "id": "3963d004-9937-4509-bd3e-a1670d069cef",
+    "ts": "2025-08-25T21:09:43.631742Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-25T21:09:43.631629Z"
+  },
+  {
+    "id": "7d277da9-e97e-448e-8c9f-04ea4370c6b0",
+    "ts": "2025-08-25T21:10:04.319722Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-25T21:10:04.319685Z"
+  },
+  {
+    "id": "d3c39de2-beae-4c98-a865-9641f1b572bf",
+    "ts": "2025-08-25T21:15:04.349268Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-25T21:15:04.349183Z"
+  },
+  {
+    "id": "6735606e-b0ed-478b-ba27-698ddfd10490",
+    "ts": "2025-08-25T21:15:34.486915Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-25T21:15:34.486758Z"
+  },
+  {
+    "id": "2e062d78-19b2-4209-988a-fe015e2b7222",
+    "ts": "2025-08-25T21:16:10.335562Z",
+    "role": "system",
+    "text": "heartbeat @ 2025-08-25T21:16:10.335528Z"
+  },
+  {
+    "id": "fd33db2f-a0dc-4a3e-948a-832ab8de511b",
+    "ts": "2025-09-05T00:04:36.597287Z",
+    "role": "user",
+    "text": "string"
+  },
+  {
+    "id": "17a72283-ebaa-49d4-a2e3-a9cad04e570a",
+    "ts": "2025-09-09T20:53:23.090730Z",
+    "role": "user",
+    "text": "{\"text\": \"Phase 2 is online—store this and summarize it!\", \"meta\": {\"type\": \"chat\", \"user_id\": \"omar\", \"labels\": {\"topic\": \"phase2\", \"mood\": \"hyped\"}, \"summary\": \"Phase 2 is online—store this and summarize it!\", \"ts\": \"2025-09-09T20:53:23.090630\"}}"
+  },
+  {
+    "id": "c45cb67c-7252-43ac-a06f-89457dec66fe",
+    "ts": "2025-09-10T21:02:59.258734Z",
+    "role": "user",
+    "text": "string"
+  },
+  {
+    "id": "46048839-c5df-4ac2-bb44-6b071ebfacbf",
+    "ts": "2025-09-10T21:03:21.585575Z",
+    "role": "system",
+    "text": "seed check"
+  },
+  {
+    "id": "c8e1fe6e-272e-4202-8937-2e1399e695bf",
+    "ts": "2025-09-10T21:03:25.366344Z",
+    "role": "system",
+    "text": "seed check"
+  },
+  {
+    "id": "1eb8f0a5-4168-41f1-b6d4-70bb311a2881",
+    "ts": "2025-09-10T21:09:19.713908Z",
+    "role": "system",
+    "text": "Phase 2 is online—store this and summarize it!"
+  },
+  {
+    "id": "efae37c3-f9dc-4b57-8078-29361ba33bc4",
+    "ts": "2025-09-10T22:53:39.199228Z",
+    "role": "system",
+    "text": "Phase 2 – smoke test"
+  },
+  {
+    "id": "1c96c40a-e60b-4d5a-9811-0cb6355046f3",
+    "ts": "2025-09-10T22:54:14.243088Z",
+    "role": "user",
+    "text": "Log me",
+    "summary": "short note",
+    "labels": {
+      "phase": 2,
+      "kind": "smoke"
+    },
+    "meta": {
+      "source": "swagger",
+      "who": "me"
+    }
+  },
+  {
+    "id": "9cbd6e5d-b58e-41d8-8883-a1ec657cdf5c",
+    "ts": "2025-09-12T23:29:49.935889Z",
+    "role": "user",
+    "text": "string",
+    "summary": "string",
+    "labels": {
+      "additionalProp1": {}
+    },
+    "meta": {
+      "additionalProp1": {}
+    },
+    "additionalProp1": {}
+  },
+  {
+    "id": "119184cd-b886-4794-bd5b-6e1f8118b566",
+    "ts": "2025-09-12T23:50:08.355438Z",
+    "role": "user",
+    "text": "Phase 2 sanity check",
+    "summary": null,
+    "labels": {
+      "phase": "2"
+    },
+    "meta": {
+      "type": "chat",
+      "user_id": "omar"
+    }
+  },
+  {
+    "id": "67ebc7e7-60d9-466a-82de-fca7b2791a71",
+    "ts": "2025-09-12T23:50:08.376991Z",
+    "role": "assistant",
+    "text": "Echo: Phase 2 sanity check",
+    "summary": null,
+    "labels": {
+      "source": "system"
+    },
+    "meta": {
+      "type": "chat",
+      "user_id": "omar"
+    }
+  },
+  {
+    "id": "88cf58ba-7156-4cb5-92f1-12fddfb3e11f",
+    "ts": "2025-09-13T00:09:51.766950Z",
+    "role": "user",
+    "text": "Phase 2 sanity check.",
+    "summary": null,
+    "labels": {
+      "phase": "2",
+      "topic": "sanity"
+    },
+    "meta": {
+      "type": "chat",
+      "user_id": "omar"
+    }
+  },
+  {
+    "id": "ae0b7aa2-6a08-43ad-b656-6db267d3b77a",
+    "ts": "2025-09-13T00:09:51.785646Z",
+    "role": "assistant",
+    "text": "Echo: Phase 2 sanity check.",
+    "summary": null,
+    "labels": {
+      "source": "system"
+    },
+    "meta": {
+      "type": "chat",
+      "user_id": "omar"
+    }
+  },
+  {
+    "id": "3bc4e659-2983-4555-91dd-47056356af44",
+    "ts": "2025-09-13T00:18:24.757783Z",
+    "role": "system",
+    "text": "Phase 2 smoke test",
+    "summary": "short note",
+    "labels": {
+      "phase": "2",
+      "kind": "smoke"
+    },
+    "meta": {
+      "source": "swagger",
+      "who": "me"
+    }
+  },
+  {
+    "id": "6e355ece-057a-40c7-960a-fd1c455b754d",
+    "ts": "2025-09-14T20:50:34.010602Z",
+    "role": "user",
+    "text": "This is my first test memory entry"
+  },
+  {
+    "id": "d29dc447-56d3-4dcb-a961-a7ab97bdc0b9",
+    "ts": "2025-09-14T20:56:24.265613Z",
+    "role": "user",
+    "text": "Hello Auren, can you hear me?",
+    "summary": null,
+    "labels": {},
+    "meta": {
+      "type": "chat",
+      "user_id": "omar"
+    }
+  },
+  {
+    "id": "38f5d383-2231-4724-afe8-a3ff7be4fea0",
+    "ts": "2025-09-14T20:56:24.284517Z",
+    "role": "assistant",
+    "text": "Echo: Hello Auren, can you hear me?",
+    "summary": null,
+    "labels": {
+      "source": "system"
+    },
+    "meta": {
+      "type": "chat",
+      "user_id": "omar"
+    }
+  },
+  {
+    "id": "a2b6ffd8-c6ae-446b-92ad-eb95d1dda9da",
+    "ts": "2025-09-14T21:35:43.644556Z",
+    "role": "system",
+    "text": "New feature ideas for Phase 3 UI.",
+    "summary": "feature ideas",
+    "labels": {
+      "phase": "3",
+      "topic": "ui",
+      "kind": "feedback"
+    },
+    "meta": {
+      "source": "swagger",
+      "who": "me"
+    }
+  },
+  {
+    "id": "dc6a2851-1197-4288-8cfc-43b1362328d4",
+    "ts": "2025-09-14T22:35:19.370547Z",
+    "role": "system",
+    "text": "New feature ideas for Phase 3 UI.",
+    "summary": "feature ideas",
+    "labels": {
+      "phase": "3",
+      "topic": "ui",
+      "kind": "feedback"
+    },
+    "meta": {
+      "source": "swagger",
+      "who": "me"
+    }
+  },
+  {
+    "id": "3d2ac729-564d-4475-ab8b-563a8a5657cc",
+    "ts": "2025-09-14T23:01:55.604181Z",
+    "role": "system",
+    "text": "Log new feature ideas for Phase 3 UI.",
+    "summary": "feature ideas",
+    "labels": {
+      "phase": "3",
+      "topic": "ui",
+      "kind": "feedback"
+    },
+    "meta": {
+      "source": "swagger",
+      "who": "me"
+    }
+  }
+]

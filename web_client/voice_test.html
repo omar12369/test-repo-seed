@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SEED Voice Test</title>
+  <style>
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto; margin: 24px; }
+    h1 { margin: 0 0 16px; }
+    .row { display: flex; gap: 12px; align-items: center; margin: 10px 0; }
+    select, button { padding: 8px 10px; font-size: 14px; }
+    textarea { width: 640px; height: 140px; padding: 10px; font-size: 14px; }
+    audio { width: 520px; }
+    #status { margin-top: 10px; white-space: pre-wrap; }
+    .ok { color: #0a0; }
+    .err { color: #b00; }
+    .muted { color: #666; }
+  </style>
+</head>
+<body>
+  <h1>SEED Voice Test</h1>
+
+  <div class="row">
+    <label for="profile"><b>Profile</b></label>
+    <select id="profile"></select>
+    <button id="btnSpeak">▶ Speak</button>
+    <button id="btnClear">Clear</button>
+  </div>
+
+  <div class="row">
+    <textarea id="text">Omar, this is a short test. Good morning.</textarea>
+    <audio id="player" controls></audio>
+  </div>
+
+  <div id="status" class="muted"></div>
+
+  <script>
+    const profileEl = document.getElementById("profile");
+    const textEl = document.getElementById("text");
+    const player = document.getElementById("player");
+    const statusEl = document.getElementById("status");
+    const btnSpeak = document.getElementById("btnSpeak");
+    const btnClear = document.getElementById("btnClear");
+
+    function setStatus(msg, kind="muted") {
+      statusEl.className = kind;
+      statusEl.textContent = msg;
+    }
+
+    async function loadProfiles() {
+      try {
+        const res = await fetch("/v1/voice/presets", { cache: "no-store" });
+        if (!res.ok) throw new Error(`presets HTTP ${res.status}`);
+        const data = await res.json();
+
+        // Accept either {presets:[...]} or a raw list
+        const presets = Array.isArray(data) ? data : (data.presets || []);
+        profileEl.innerHTML = "";
+
+        for (const p of presets) {
+          const name = (typeof p === "string") ? p : (p.name || p.id || "");
+          if (!name) continue;
+          const opt = document.createElement("option");
+          opt.value = name;
+          opt.textContent = name;
+          profileEl.appendChild(opt);
+        }
+
+        // Default selection
+        const want = "auren_balanced";
+        const exists = Array.from(profileEl.options).some(o => o.value === want);
+        if (exists) profileEl.value = want;
+
+        setStatus("Profiles loaded.", "muted");
+      } catch (e) {
+        setStatus(`Failed to load presets: ${e}`, "err");
+        // Fallback so the page still works
+        profileEl.innerHTML = `<option value="auren_balanced">auren_balanced</option>`;
+      }
+    }
+
+    async function speak() {
+      const text = (textEl.value || "").trim();
+      const profile = profileEl.value || "auren_balanced";
+
+      if (!text) {
+        setStatus("Please enter text.", "err");
+        return;
+      }
+
+      btnSpeak.disabled = true;
+      setStatus("Generating audio…", "muted");
+
+      try {
+        const res = await fetch("/v1/voice/speak", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text, profile }),
+        });
+
+        // If server returned non-200, show the body (FastAPI gives helpful JSON)
+        if (!res.ok) {
+          const bodyText = await res.text();
+          throw new Error(`speak HTTP ${res.status}\n${bodyText}`);
+        }
+
+        const data = await res.json();
+
+        // Prefer abs_url if present, then url
+        const src = data.abs_url || data.url;
+        if (!src) {
+          throw new Error(`No 'url' returned from server.\n${JSON.stringify(data, null, 2)}`);
+        }
+
+        // Update player
+        player.src = src;
+        player.load();
+
+        // Wait until browser knows duration; then play
+        await new Promise((resolve, reject) => {
+          const onOk = () => { cleanup(); resolve(); };
+          const onErr = () => { cleanup(); reject(new Error("Audio failed to load.")); };
+          const cleanup = () => {
+            player.removeEventListener("canplay", onOk);
+            player.removeEventListener("error", onErr);
+          };
+          player.addEventListener("canplay", onOk, { once: true });
+          player.addEventListener("error", onErr, { once: true });
+        });
+
+        await player.play().catch(() => {
+          // Autoplay can be blocked; user can press play manually
+        });
+
+        setStatus(`OK: ${src}`, "ok");
+      } catch (e) {
+        setStatus(String(e), "err");
+      } finally {
+        btnSpeak.disabled = false;
+      }
+    }
+
+    btnSpeak.addEventListener("click", speak);
+    btnClear.addEventListener("click", () => {
+      textEl.value = "";
+      player.removeAttribute("src");
+      player.load();
+      setStatus("Cleared.", "muted");
+    });
+
+    loadProfiles();
+  </script>
+</body>
+</html>

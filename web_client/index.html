@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>SEED Voice Console</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    body{font-family:system-ui,Segoe UI,Arial,sans-serif;margin:24px;background:#0b0b0b;color:#e8e8e8}
+    h1{font-weight:700;margin:0 0 12px}
+    .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;background:#141414;border:1px solid #262626;
+         border-radius:12px;padding:10px 12px;margin:8px 0}
+    .name{font-family:ui-monospace,Consolas,monospace;font-size:12px;color:#9ad}
+    button{background:#1f6feb;border:0;color:#fff;padding:6px 10px;border-radius:8px;cursor:pointer}
+    button.secondary{background:#30363d}
+    audio{height:28px}
+    .muted{color:#9a9a9a;font-size:12px}
+    #status{margin-bottom:12px}
+    #controls{display:flex;gap:8px;margin-bottom:12px}
+    input[type=number]{width:90px}
+    a{color:#8bd}
+  </style>
+</head>
+<body>
+  <h1>SEED Voice Console</h1>
+  <div id="status" class="muted">Loading…</div>
+  <div id="controls">
+    <button id="refresh">Refresh</button>
+    <label>Show
+      <input id="limit" type="number" min="5" max="200" value="50"/> files
+    </label>
+  </div>
+  <div id="list"></div>
+
+<script>
+const base = location.origin; // http://127.0.0.1:8000
+const elStatus = document.getElementById('status');
+const elList = document.getElementById('list');
+const elLimit = document.getElementById('limit');
+
+document.getElementById('refresh').onclick = load;
+
+function fmtBytes(n){
+  if (!n && n!==0) return '';
+  const u=['B','KB','MB','GB']; let i=0; let v=n;
+  while(v>=1024 && i<u.length-1){v/=1024;i++;}
+  return `${v.toFixed(1)} ${u[i]}`;
+}
+
+async function load(){
+  elStatus.textContent = 'Loading…';
+  elList.innerHTML = '';
+  try{
+    // Use v1 history if present, else debug/list
+    let res = await fetch('/v1/voice/history?limit=' + encodeURIComponent(elLimit.value));
+    if (!res.ok) throw 0;
+    var data = await res.json();
+    var files = (data.files || []);
+  }catch{
+    const res = await fetch('/v1/voice/debug/list');
+    const data = await res.json();
+    var files = (data.files || []).map(f => ({ name: f.name, size: f.size }));
+    // newest first
+    files.reverse();
+  }
+
+  if (!files.length){
+    elStatus.textContent = 'No audio yet — use /v1/voice/speak to generate some.';
+    return;
+  }
+
+  elStatus.textContent = `Showing ${Math.min(files.length, elLimit.value)} of ${files.length} files`;
+  files.slice(0, Number(elLimit.value)).forEach(file => {
+    const name = file.name;
+    const audioUrl = `/audio/${name}`;
+    const playerUrl = `/v1/voice/play/${name}`;
+
+    const row = document.createElement('div');
+    row.className = 'row';
+    row.innerHTML = `
+      <audio controls src="${audioUrl}"></audio>
+      <span class="name" title="${name}">${name}</span>
+      <span class="muted">${fmtBytes(file.size)}</span>
+      <button class="secondary" data-copy="${base+audioUrl}">Copy /audio URL</button>
+      <button class="secondary" data-copy="${base+playerUrl}">Copy /play URL</button>
+      <a href="${playerUrl}" target="_blank">Open player</a>
+    `;
+    row.querySelectorAll('button[data-copy]').forEach(btn=>{
+      btn.addEventListener('click', async () => {
+        await navigator.clipboard.writeText(btn.getAttribute('data-copy'));
+        btn.textContent = 'Copied!';
+        setTimeout(()=>btn.textContent='Copy again',900);
+      });
+    });
+    elList.appendChild(row);
+  });
+}
+
+load();
+</script>
+</body>
+</html>

@@ -1,0 +1,23 @@
+# Normalize line endings
+*         text=auto
+
+# Force LF for code & configs
+*.py      text eol=lf
+*.json    text eol=lf
+*.yml     text eol=lf
+*.yaml    text eol=lf
+*.md      text eol=lf
+*.env     text eol=lf
+
+# Windows-native scripts may prefer CRLF
+*.bat     text eol=crlf
+*.ps1     text eol=crlf
+
+# Treat media as binary (no diffs/merges)
+*.wav     -text -merge
+*.mp3     -text -merge
+*.m4a     -text -merge
+*.ogg     -text -merge
+
+# VS Code settings (text files)
+.vscode/** text eol=lf
