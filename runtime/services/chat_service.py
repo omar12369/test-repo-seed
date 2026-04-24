@@ -1,6 +1,8 @@
 # runtime/services/chat_service.py
 from __future__ import annotations
 
+import ast
+import operator
 import re
 from collections import deque
 from dataclasses import dataclass
@@ -35,22 +37,108 @@ def _has_phrase(text: str, phrases: list[str]) -> bool:
     return any(phrase in text for phrase in phrases)
 
 
+def _normalize_prompt_text(text: str) -> str:
+    """
+    Normalizes short control prompts without changing normal user text behavior.
+
+    This is intentionally conservative:
+    - lowercase
+    - trim whitespace
+    - collapse repeated spaces
+    - remove a small set of polite/control punctuation at the edges
+    """
+    t = (text or "").lower().strip()
+    t = re.sub(r"\s+", " ", t)
+    t = t.strip(" .,!")
+
+    return t
+
+
 # ----------------------------
-# Passive Session Context — 7D Phase 1 / Phase 4
+# Direct Answer Helpers
+# ----------------------------
+_ALLOWED_MATH_OPERATORS = {
+    ast.Add: operator.add,
+    ast.Sub: operator.sub,
+    ast.Mult: operator.mul,
+    ast.Div: operator.truediv,
+    ast.USub: operator.neg,
+}
+
+
+def _safe_eval_math_node(node: ast.AST) -> float | int:
+    if isinstance(node, ast.Expression):
+        return _safe_eval_math_node(node.body)
+
+    if isinstance(node, ast.Constant) and isinstance(node.value, (int, float)):
+        return node.value
+
+    if isinstance(node, ast.UnaryOp) and type(node.op) in _ALLOWED_MATH_OPERATORS:
+        return _ALLOWED_MATH_OPERATORS[type(node.op)](_safe_eval_math_node(node.operand))
+
+    if isinstance(node, ast.BinOp) and type(node.op) in _ALLOWED_MATH_OPERATORS:
+        left = _safe_eval_math_node(node.left)
+        right = _safe_eval_math_node(node.right)
+        return _ALLOWED_MATH_OPERATORS[type(node.op)](left, right)
+
+    raise ValueError("Unsupported math expression")
+
+
+def _try_direct_arithmetic_answer(text: str) -> Optional[str]:
+    """
+    Narrow direct-answer guard.
+
+    Purpose:
+    - Prevent simple arithmetic questions from becoming long generic responses.
+    - Keep short factual answers ineligible for continuation.
+    """
+    t = (text or "").lower().strip()
+
+    match = re.fullmatch(
+        r"(?:what\s+is\s+)?([0-9\.\s\+\-\*\/\(\)]+)\??",
+        t,
+    )
+
+    if not match:
+        return None
+
+    expression = match.group(1).strip()
+
+    if not expression:
+        return None
+
+    try:
+        parsed = ast.parse(expression, mode="eval")
+        result = _safe_eval_math_node(parsed)
+    except Exception:
+        return None
+
+    if isinstance(result, float) and result.is_integer():
+        return str(int(result))
+
+    return str(result)
+
+
+# ----------------------------
+# Passive Session Context — 7D Phase 1 / Phase 4 / Phase 5 / Phase 6
 # ----------------------------
 _CONTEXT_WINDOW = 5
+_CONTINUATION_ELIGIBLE_MIN_LENGTH = 200
 
 
 class _SessionContext:
     """
-    Step 7D Phase 1 / Phase 4: Runtime-session context tracking.
+    Runtime-session context tracking.
 
-    This stores only recent runtime-session exchanges in memory.
-    It does not write files, read files, persist data, or affect the voice system.
+    Stores recent exchanges in memory only.
+    No files, no database, no persistence, no voice changes.
 
-    Phase 4 addition:
-    It also keeps a session-only continuation cursor per topic so repeated
-    continuation prompts can advance instead of repeating the same segment.
+    Phase 5:
+    Continuation is only allowed when a response was marked eligible.
+
+    Phase 6:
+    Continuation can find the last valid eligible response even if a short
+    direct answer happened after it.
     """
 
     def __init__(self, max_items: int = _CONTEXT_WINDOW) -> None:
@@ -86,16 +174,10 @@ _session_context = _SessionContext()
 
 
 # ----------------------------
-# Context Awareness Helpers — 7D Phase 2 / Phase 3 / Phase 4
+# Context Awareness Helpers
 # ----------------------------
 def _is_context_continuation_prompt(text: str) -> bool:
-    """
-    Step 7D Phase 2: Detect short/vague continuation prompts.
-
-    These prompts may inherit the previous topic from the runtime-session
-    context. This is intentionally narrow so we do not override clear intent.
-    """
-    t = (text or "").lower().strip()
+    t = _normalize_prompt_text(text)
 
     return t in [
         "ok",
@@ -105,45 +187,52 @@ def _is_context_continuation_prompt(text: str) -> bool:
         "makes sense",
         "that makes sense",
         "continue",
+        "continue please",
+        "please continue",
         "go on",
+        "go on please",
         "keep going",
+        "keep going please",
+        "more",
+        "more please",
+        "tell me more",
         "what next",
         "what's next",
         "next",
+        "next please",
         "then what",
-        "and?",
-        "so?",
-        "then?",
+        "and",
+        "so",
+        "then",
     ]
 
 
 def _is_strong_continuation_prompt(text: str) -> bool:
-    """
-    Step 7D Phase 3: Detect prompts that should continue the previous answer,
-    not just inherit the topic.
-    """
-    t = (text or "").lower().strip()
+    t = _normalize_prompt_text(text)
 
     return t in [
         "continue",
+        "continue please",
+        "please continue",
         "go on",
+        "go on please",
         "keep going",
+        "keep going please",
+        "more",
+        "more please",
+        "tell me more",
         "what next",
         "what's next",
         "next",
+        "next please",
         "then what",
-        "and?",
-        "so?",
-        "then?",
+        "and",
+        "so",
+        "then",
     ]
 
 
 def _get_context_topic_fallback(default: str = "general") -> str:
-    """
-    Step 7D Phase 2: Return the last known topic if available.
-
-    This is session-only and does not persist anything.
-    """
     last = _session_context.last()
 
     if not last:
@@ -158,9 +247,6 @@ def _get_context_topic_fallback(default: str = "general") -> str:
 
 
 def _get_last_context_value(key: str, default: object = None) -> object:
-    """
-    Step 7D Phase 3: Safely fetch a value from the last session context entry.
-    """
     last = _session_context.last()
 
     if not last:
@@ -169,34 +255,47 @@ def _get_last_context_value(key: str, default: object = None) -> object:
     return last.get(key, default)
 
 
+def _get_last_valid_continuation_context() -> Optional[dict[str, object]]:
+    """
+    Finds the most recent continuation-eligible response.
+
+    This prevents short direct answers from destroying the previous valid
+    continuation thread during the same runtime session.
+    """
+    history = _session_context.all()
+
+    for entry in reversed(history):
+        response = entry.get("response")
+        eligible = bool(entry.get("continuation_eligible", False))
+
+        if eligible and isinstance(response, str) and response.strip():
+            return entry
+
+    return None
+
+
+def _is_response_continuation_eligible(response: str) -> bool:
+    return len((response or "").strip()) > _CONTINUATION_ELIGIBLE_MIN_LENGTH
+
+
 def _build_controlled_continuation_response(
     message: str,
     topic: str,
     previous_response: Optional[str],
+    previous_continuation_eligible: bool,
     continuation_index: int,
 ) -> Optional[str]:
     """
-    Step 7D Phase 3 / Phase 4: Controlled Continuation Engine.
+    Controlled Continuation Engine.
 
-    Phase 3:
-    Creates a continuation segment for vague prompts like "continue".
-
-    Phase 4:
-    Uses a session-only continuation index so repeated continuation prompts
-    advance through a small topic-specific sequence instead of repeating.
-
-    It is intentionally conservative:
-    - no persistence
-    - no files
-    - no database
-    - no voice changes
-    - no uncontrolled long-form expansion
+    Continuation is only allowed if the previous valid continuation context
+    was eligible.
     """
     if not _is_strong_continuation_prompt(message):
         return None
 
-    if not previous_response:
-        return None
+    if not previous_response or not previous_continuation_eligible:
+        return "No active context to continue."
 
     if topic == "system":
         return _choose_sequence_variant(continuation_index, [
@@ -318,23 +417,6 @@ def _build_memory_context_stub(
     topic: str,
     emotion_type: str,
 ) -> Optional[str]:
-    """
-    Step 7C: Memory Hooks Placeholder.
-
-    This prepares the chat pipeline for future memory support without
-    storing, reading, or modifying anything yet.
-
-    Current behavior:
-    - No persistence
-    - No files
-    - No database
-    - No memory recall
-    - No response behavior change
-
-    Future use:
-    This function can later return memory context that may be used by
-    the response builder, but for now it intentionally returns None.
-    """
     _ = message
     _ = intent
     _ = topic
@@ -347,12 +429,6 @@ def _build_memory_context_stub(
 # Adaptive Response Depth — 7B
 # ----------------------------
 def _detect_depth_level(message: str, emotion_type: str, intent: str) -> str:
-    """
-    Step 7B: Adaptive Response Depth.
-
-    This does not change intent, topic, emotion, or anchor behavior.
-    It only determines how much final response detail should be returned.
-    """
     t = (message or "").lower().strip()
     words = re.findall(r"\b[\w'-]+\b", t)
     word_count = len(words)
@@ -403,12 +479,6 @@ def _detect_depth_level(message: str, emotion_type: str, intent: str) -> str:
 
 
 def _apply_depth_expansion(response: str, depth: str, topic: str, intent: str, emotion_type: str, message: str) -> str:
-    """
-    Step 7B/7B.1: Final-stage response shaping.
-
-    This function is intentionally placed after the normal response is built.
-    It does not alter classification, topic routing, anchor enforcement, or voice behavior.
-    """
     base = (response or "").strip()
 
     if not base:
@@ -546,6 +616,9 @@ def _classify_intent(text: str) -> str:
     if _is_strong_continuation_prompt(t):
         return "command"
 
+    if _try_direct_arithmetic_answer(t) is not None:
+        return "direct_answer"
+
     if _has_phrase(t, [
         "pleasure to meet",
         "nice to meet",
@@ -594,6 +667,9 @@ def _detect_topic(text: str) -> str:
 
     if _is_context_continuation_prompt(t):
         return _get_context_topic_fallback("general")
+
+    if _try_direct_arithmetic_answer(t) is not None:
+        return "direct_answer"
 
     if _has_phrase(t, ["meet you"]) or any(_has_word(t, w) for w in ["auren", "partner", "dear", "together"]):
         return "connection"
@@ -824,6 +900,10 @@ def _build_response(
 ) -> str:
     _ = memory_context
 
+    direct_answer = _try_direct_arithmetic_answer(message)
+    if direct_answer is not None:
+        return direct_answer
+
     if continuation_response:
         core = continuation_response
 
@@ -922,7 +1002,7 @@ def _build_response(
 @dataclass
 class ChatService:
     """
-    Phase 7 — Conversational Intelligence (Step 7D Phase 4)
+    Phase 7 — Conversational Intelligence (Step 7D Phase 6)
 
     Preserves:
     - 6F anchor enforcement
@@ -933,14 +1013,17 @@ class ChatService:
     - 7D Phase 1 passive session context tracking
     - 7D Phase 2 topic inheritance
     - 7D Phase 3 controlled continuation
+    - 7D Phase 4 session continuation buffer
+    - 7D Phase 5 continuation eligibility gate
+    - direct short arithmetic answers
     - structured responses
     - controlled variation
     - stable voice compatibility
 
     Adds:
-    - session continuation buffer
-    - per-topic continuation cursor in RAM
-    - repeated continue prompts advance through controlled segments
+    - normalized continuation matching
+    - valid continuation context lookup
+    - short/direct answers no longer destroy previous eligible continuation context
     - no persistence
     - no files
     - no database
@@ -961,30 +1044,55 @@ class ChatService:
         if not msg:
             return "(silence)"
 
-        previous_response_raw = _get_last_context_value("response", None)
-        previous_response = previous_response_raw if isinstance(previous_response_raw, str) else None
+        strong_continuation = _is_strong_continuation_prompt(msg)
+
+        if strong_continuation:
+            valid_context = _get_last_valid_continuation_context()
+
+            if valid_context:
+                previous_response_raw = valid_context.get("response", None)
+                previous_response = previous_response_raw if isinstance(previous_response_raw, str) else None
+                previous_continuation_eligible = True
+                inherited_topic_raw = valid_context.get("topic", "general")
+                inherited_topic = inherited_topic_raw if isinstance(inherited_topic_raw, str) else "general"
+            else:
+                previous_response = None
+                previous_continuation_eligible = False
+                inherited_topic = "general"
+        else:
+            previous_response_raw = _get_last_context_value("response", None)
+            previous_response = previous_response_raw if isinstance(previous_response_raw, str) else None
+
+            previous_continuation_eligible_raw = _get_last_context_value("continuation_eligible", False)
+            previous_continuation_eligible = bool(previous_continuation_eligible_raw)
+            inherited_topic = "general"
 
         intent = _classify_intent(msg)
         topic = _detect_topic(msg)
+
+        if strong_continuation and previous_continuation_eligible:
+            topic = inherited_topic
+
         question_shape = _detect_question_shape(msg)
         emotion_type = _detect_emotion_type(msg)
         depth_level = _detect_depth_level(msg, emotion_type, intent)
         context_inherited = _is_context_continuation_prompt(msg)
-        strong_continuation = _is_strong_continuation_prompt(msg)
 
-        if strong_continuation:
+        if strong_continuation and previous_continuation_eligible:
             continuation_index = _session_context.next_continuation_index(topic)
         else:
             continuation_index = 0
-            _session_context.reset_continuation(topic)
+            if not strong_continuation:
+                _session_context.reset_continuation(topic)
 
         continuation_response = _build_controlled_continuation_response(
             msg,
             topic,
             previous_response,
+            previous_continuation_eligible,
             continuation_index,
         )
-        continuation_used = continuation_response is not None
+        continuation_used = continuation_response is not None and continuation_response != "No active context to continue."
 
         memory_context = _build_memory_context_stub(
             msg,
@@ -1004,6 +1112,8 @@ class ChatService:
             continuation_response=continuation_response,
         )
 
+        continuation_eligible = _is_response_continuation_eligible(response)
+
         _session_context.add({
             "message": msg,
             "intent": intent,
@@ -1016,6 +1126,7 @@ class ChatService:
             "strong_continuation": strong_continuation,
             "continuation_index": continuation_index,
             "continuation_used": continuation_used,
+            "continuation_eligible": continuation_eligible,
             "response": response,
         })
 
@@ -1024,7 +1135,7 @@ class ChatService:
         if self.logger:
             try:
                 self.logger.info(
-                    "ChatService intent=%s topic=%s question_shape=%s emotion_type=%s depth_level=%s memory_context_active=%s context_inherited=%s strong_continuation=%s continuation_index=%s continuation_used=%s context_history_size=%s response=%r",
+                    "ChatService intent=%s topic=%s question_shape=%s emotion_type=%s depth_level=%s memory_context_active=%s context_inherited=%s strong_continuation=%s continuation_index=%s continuation_used=%s continuation_eligible=%s context_history_size=%s response=%r",
                     intent,
                     topic,
                     question_shape,
@@ -1035,6 +1146,7 @@ class ChatService:
                     strong_continuation,
                     continuation_index,
                     continuation_used,
+                    continuation_eligible,
                     context_history_size,
                     response,
                 )
